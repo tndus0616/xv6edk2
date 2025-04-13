@@ -56,9 +56,9 @@ trap(struct trapframe *tf)
       release(&tickslock);
     }
     lapiceoi();
-    if(myproc() && (tf->cs & 3) == 3) {  // 유저 모드 + 유저 프로세스
+    if(myproc() && (tf->cs & 3) == 3) {
       if (myproc()->scheduler) {
-        ((void(*)())myproc()->scheduler)();  // 스케줄러 실행
+        ((void(*)())myproc()->scheduler)();
       }
     }
 
