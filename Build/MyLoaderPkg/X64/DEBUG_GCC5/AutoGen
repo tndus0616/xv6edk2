@@ -1,0 +1,8 @@
+/home/isy0616/edk2/Build/MyLoaderPkg/X64/DEBUG_GCC5/BuildOptions
+/home/isy0616/edk2/Build/MyLoaderPkg/X64/DEBUG_GCC5/PcdTokenNumber
+/home/isy0616/edk2/Build/MyLoaderPkg/X64/DEBUG_GCC5/X64/TOOLS_DEF.X64
+/home/isy0616/edk2/Conf/build_rule.txt
+/home/isy0616/edk2/Conf/tools_def.txt
+/home/isy0616/edk2/MdePkg/MdeLibs.dsc.inc
+/home/isy0616/edk2/MdePkg/MdePkg.dec
+/home/isy0616/edk2/MyLoaderPkg/MyLoaderPkg.dsc
