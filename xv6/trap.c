@@ -56,11 +56,15 @@ trap(struct trapframe *tf)
       release(&tickslock);
     }
     lapiceoi();
-    if((tf->cs & 3) == DPL_USER){
-      struct proc *p = myproc();
-      if(p->scheduler != 0){
-        tf->eip = p->scheduler; 
-      }
+    // New code for scheduler
+    if(myproc() && (tf->cs&3) == DPL_USER) {
+      if(myproc()->state == RUNNING && myproc()->scheduler)
+      {
+        uint ret_addr = tf->eip;
+        tf->esp -= 4;
+        *(uint*)tf->esp = ret_addr;
+        tf->eip = myproc()->scheduler;
+      } 
     }
     break;
   case T_IRQ0 + IRQ_IDE:
@@ -87,7 +91,7 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-
+  
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
