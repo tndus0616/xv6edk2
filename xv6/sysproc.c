@@ -96,7 +96,6 @@ sys_uthread_init(void)
     int addr;
     if(argint(0, &addr) < 0)
       return -1;
-    struct proc *p = myproc();
-    p->scheduler = (uint)addr;
+    myproc()->scheduler = (uint)addr;
     return 0;
 }
