@@ -1,3 +1,4 @@
+#include "types.h"
 struct stat;
 struct rtcdate;
 
@@ -23,7 +24,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int uthread_init(int);
+int uthread_init(int address);
 
 // ulib.c
 int stat(char*, struct stat*);
