@@ -23,9 +23,10 @@ thread_p  current_thread;
 thread_p  next_thread;
 extern void thread_switch(void);
 
-void 
+static void 
 thread_schedule(void)
 {
+  
   thread_p t;
 
   /* Find another runnable thread. */
@@ -35,30 +36,38 @@ thread_schedule(void)
       next_thread = t;
       break;
     }
-  }
+  }  
 
   if (t >= all_thread + MAX_THREAD && current_thread->state == RUNNABLE) {
     /* The current thread is the only runnable thread; run it. */
     next_thread = current_thread;
   }
 
-  if (next_thread == 0) {
+  if (next_thread == 0) {    
     printf(2, "thread_schedule: no runnable threads\n");
-    exit();
+    exit(); 
   }
 
-  if (current_thread != next_thread) {         /* switch threads?  */
-    next_thread->state = RUNNING;
-    current_thread->state = RUNNABLE;
-    thread_switch();
+  if (current_thread != next_thread) {         /* switch threads?  */    
+    next_thread->state = RUNNING;    
+    thread_switch();   
   } else
     next_thread = 0;
 }
 
+
+void
+thread_yield(void)
+{      
+  current_thread->state = RUNNABLE;
+  thread_schedule();
+}
+
+
 void 
 thread_init(void)
 {
-  uthread_init((int)thread_schedule);
+  uthread_init((int)thread_yield); 
 
   // main() is thread 0, which will make the first invocation to
   // thread_schedule().  it needs a stack so that the first thread_switch() can
@@ -68,6 +77,14 @@ thread_init(void)
   current_thread = &all_thread[0];
   current_thread->state = RUNNING;
 }
+
+void
+thread_exit(void)
+{  
+  current_thread->state = FREE;
+  thread_schedule();
+}
+
 
 void 
 thread_create(void (*func)())
@@ -81,8 +98,9 @@ thread_create(void (*func)())
   t->sp -= 4;                              // space for return address
   * (int *) (t->sp) = (int)func;           // push return address on stack
   t->sp -= 32;                             // space for registers that thread_switch expects
-  t->state = RUNNABLE;
+  t->state = RUNNABLE;  
 }
+
 
 static void 
 mythread(void)
@@ -90,17 +108,18 @@ mythread(void)
   int i;
   printf(1, "my thread running\n");
   for (i = 0; i < 100; i++) {
-    printf(1, "my thread 0x%x\n", (int) current_thread);
+    printf(1, "my thread 0x%x\n", (int) current_thread);      
+    for (volatile int j = 0; j < 100000; j++);  // delay 루프    
   }
   printf(1, "my thread: exit\n");
-  current_thread->state = FREE;
+  thread_exit();
 }
 
 
 int 
 main(int argc, char *argv[]) 
 {
-  thread_init();
+  thread_init();  
   thread_create(mythread);
   thread_create(mythread);
   thread_schedule();
