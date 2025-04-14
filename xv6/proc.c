@@ -538,3 +538,12 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+uthread_init(int address)
+{
+  struct proc *cur_proc = myproc();
+  cprintf("uthread_init: setting scheduler to %x\n", address);
+  cur_proc->scheduler = address;
+  return 0;
+}
