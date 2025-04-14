@@ -57,8 +57,8 @@ trap(struct trapframe *tf)
     }
     lapiceoi();
     if(myproc() && (tf->cs & 3) == 3) {
-      if (myproc()->scheduler) {
-        ((void(*)())myproc()->scheduler)();
+      if(myproc()->scheduler) {
+        tf->eip = myproc()->scheduler;
       }
     }
 
