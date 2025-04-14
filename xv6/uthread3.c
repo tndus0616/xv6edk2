@@ -80,10 +80,12 @@ int thread_create(void (*func)())
 
   for (t = all_thread; t < all_thread + MAX_THREAD; t++) {
     if (t->state == FREE) {
-      t->sp = (int)(t->stack + STACK_SIZE);
-      t->sp -= 4;
-      *(int*)(t->sp) = (int)func;
-      t->sp -= 32;
+      t->sp = (int)(t->stack + STACK_SIZE);   // top of stack
+      t->sp -= 4;                              // room for return address
+      *(int*)(t->sp) = (int)thread_exit;       // 실제 종료 시 호출될 함수
+      t->sp -= 4;                              // room for entry point
+      *(int*)(t->sp) = (int)func;              // 실행할 함수 push
+      t->sp -= 28;                             // 나머지 레지스터 공간
       t->tid = global_tid++;
       t->state = RUNNABLE;
       return t->tid;
@@ -122,10 +124,10 @@ static void mythread(void)
 {
   int i;
   printf(1, "my thread running: tid=%d\n", current_thread->tid);
-  for (i = 0; i < 100; i++) {
+  for (i = 0; i < 10; i++) {
     printf(1, "my thread %d\n", current_thread->tid);
-    for (volatile int j = 0; j < 100000; j++);  // delay 루프
-    thread_yield();
+    for (volatile int j = 0; j < 100000; j++); // delay loop
+    thread_yield();  // 다른 스레드에게 CPU 양보
   }
   printf(1, "my thread: exit %d\n", current_thread->tid);
   thread_exit();
