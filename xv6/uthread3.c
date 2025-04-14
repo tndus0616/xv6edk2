@@ -26,16 +26,6 @@ thread_p next_thread;
 
 extern void thread_switch(void);
 
-void thread_yield(void) {
-  current_thread->state = RUNNABLE;
-  thread_schedule();
-}
-
-void thread_exit(void) {
-  current_thread->state = FREE;
-  thread_schedule();
-}
-
 static void thread_schedule(void)
 {
   thread_p t;
@@ -63,6 +53,16 @@ static void thread_schedule(void)
   } else {
     next_thread = 0;
   }
+}
+
+void thread_yield(void) {
+  current_thread->state = RUNNABLE;
+  thread_schedule();
+}
+
+void thread_exit(void) {
+  current_thread->state = FREE;
+  thread_schedule();
 }
 
 void thread_init(void)
