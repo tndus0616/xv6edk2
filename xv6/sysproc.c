@@ -93,9 +93,11 @@ sys_uptime(void)
 int
 sys_uthread_init(void)
 {
-    int addr;
-    if(argint(0, &addr) < 0)
-      return -1;
-    myproc()->scheduler = (uint)addr;
-    return 0;
+  int addr;
+  if(argint(0, &addr) < 0) {
+    return -1;
+  }
+  struct proc *p = myproc();
+  p->scheduler = (uint)addr;
+  return 0;
 }
