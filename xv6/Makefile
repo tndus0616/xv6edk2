@@ -179,7 +179,7 @@ _uthread1: uthread1.o uthread_switch.o
 	$(OBJDUMP) -S _uthread1 > uthread1.asm
 
 _uthread3: uthread3.o
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _uthread3 uthread3.o $(ULIB)
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _uthread3 uthread3.o uthread_switch.o $(ULIB)
 	$(OBJDUMP) -S _uthread3 > uthread3.asm
 
 _uthread4: uthread4.o uthread_switch.o
