@@ -81,9 +81,9 @@ int thread_create(void (*func)())
   for (t = all_thread; t < all_thread + MAX_THREAD; t++) {
     if (t->state == FREE) {
       t->sp = (int)(t->stack + STACK_SIZE);   // top of stack
-      t->sp -= 4;                              // room for return address
+      t->sp -= 10;                              // room for return address
       *(int*)(t->sp) = (int)thread_exit;       // 실제 종료 시 호출될 함수
-      t->sp -= 4;                              // room for entry point
+      t->sp -= 10;                              // room for entry point
       *(int*)(t->sp) = (int)func;              // 실행할 함수 push
       t->sp -= 28;                             // 나머지 레지스터 공간
       t->tid = global_tid++;
