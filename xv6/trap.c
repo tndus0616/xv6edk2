@@ -48,24 +48,19 @@ trap(struct trapframe *tf)
   }
 
   switch(tf->trapno){
-  case T_IRQ0 + IRQ_TIMER:
-    if(cpuid() == 0){
-      acquire(&tickslock);
-      ticks++;
-      wakeup(&ticks);
-      release(&tickslock);
+  case T_IRQ0 + IRQ_TIMER:  //타이머 인터럽트가 발생했을때
+    if(cpuid() == 0){   //cpu 0번만 global tick 증가 및 sleep-wakeup처리
+      acquire(&tickslock);  //tick 값 보호를 위한 락 획득
+      ticks++;              //전역 tick 카운터 증가
+      wakeup(&ticks);       // tick을 기다리는 프로세스 깨움
+      release(&tickslock);    //락 해제
     }
-    lapiceoi();
-    // New code for scheduler
-    if(myproc() && (tf->cs&3) == DPL_USER) {
-      if(myproc()->state == RUNNING && myproc()->scheduler)
-      {
-        uint ret_addr = tf->eip;
-        tf->esp -= 4;
-        *(uint*)tf->esp = ret_addr;
-        tf->eip = myproc()->scheduler;
-      } 
+    lapiceoi();     //LOCAl apic에 인터럽트 처리 완료 알림
+    struct proc *proc = myproc();
+    if (proc && proc->state == RUNNING && proc->is_threaded && proc->scheduler) {
+      ((void (*)(void))proc->scheduler)();  // 🎯 사용자 스케줄러 함수 호출
     }
+
     break;
   case T_IRQ0 + IRQ_IDE:
     ideintr();
@@ -91,7 +86,7 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-  
+
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
@@ -114,13 +109,22 @@ trap(struct trapframe *tf)
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
 
-  // Force process to give up CPU on clock tick.
-  // If interrupts were on while locks held, would need to check nlock.
-  if(myproc() && myproc()->state == RUNNING &&
-     tf->trapno == T_IRQ0+IRQ_TIMER)
-    yield();
 
-  // Check if the process has been killed since we yielded
+  
+  //myproc() 현재 cpu에서 실행중인 프로세스 
+  //myproc()->state == RUNNING 현재 프로세스가 실행 중인지 확인
+  //tf->trapno == T_IRQ0+IRQ_TIMER trap 번호가 타이머 인터럽트인지 확인
+  // yield() 현재 프로세스를 RUNNABLE로 바꾸고, sched() 호출해서 다른 프로세스로 문맥을 전환
+  if(myproc() && myproc()->state == RUNNING &&tf->trapno == T_IRQ0+IRQ_TIMER) 
+  {
+    myproc()->ticks[myproc()->priority]++; //타이머 인터럽트가 발생할때 마다 1틱이 추가됨
+    yield();
+  }
+
+//myproc() 현재 CPU에서 실행 중인 프로세스
+//myproc()->killed 커널에서 이 프로세스를 종료하라고 표시 했는지 확인
+//(tf->cs & 3) == DPL_USER 현재 trap이 user space 에서 발생했는지 확인|
+//exit() 프로세스를 종료하는 시스템 콜 
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
 }
