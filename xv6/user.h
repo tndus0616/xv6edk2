@@ -1,4 +1,4 @@
-#include "types.h"
+#include "pstat.h"
 struct stat;
 struct rtcdate;
 
@@ -25,6 +25,10 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int uthread_init(int address);
+int getpinfo(struct pstat *);
+int setSchedPolicy(int);
+int yield(void);
+
 
 // ulib.c
 int stat(char*, struct stat*);

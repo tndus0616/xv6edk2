@@ -30,3 +30,7 @@ SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(uthread_init)
+SYSCALL(getpinfo)
+SYSCALL(setSchedPolicy)
+SYSCALL(yield)
+
