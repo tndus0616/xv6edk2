@@ -8,6 +8,7 @@ struct cpu {
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
   struct proc *proc;           // The process running on this cpu or null
+  int sched_policy;  
 };
 
 extern struct cpu cpus[NCPU];
@@ -48,12 +49,14 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
-  char name[16];
-  uint scheduler;              // address of the user-level scheduler
+  char name[16];               // Process name (debugging)
+  uint scheduler;  // address of the user-level scheduler
+  int is_threaded;
+  int priority;       // 현재 우선순위
+  int ticks[4];       // 각 큐에서 실행된 틱 수 
+  int wait_ticks[4];  // 각 큐에서 대기한 틱 수
 };
 
-struct proc *myproc(void);
-int uthread_init(int address);
 
 // Process memory is laid out contiguously, low addresses first:
 //   text
